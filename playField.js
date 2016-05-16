@@ -2,12 +2,13 @@
  * Created by karl on 15.05.2016.
  */
 var playField = function() {
-    map = [];
+    var map = [];
     playField.hello = function() {
         console.log("hello world")
     }
     playField.addPlayer = function(id, data, callback) {
-        var player = {
+        console.log(map);
+        var entity = {
             id: id,
             name: data.name,
             position: {
@@ -17,8 +18,9 @@ var playField = function() {
             size: 20,
             speed: 300
         };
-        map.push(player);
-        callback(player);
+        map.push(entity);
+        console.log(map)
+        callback(entity);
     }
     playField.getMap = function() {
         return map
@@ -31,11 +33,12 @@ var playField = function() {
                 x: playField.getRandomCoordinate(),
                 y: playField.getRandomCoordinate()
             },
-            size: 10
+            size: 10,
+            speed: 0
         };
         //console.log(entity)
         map.push(entity)
-        setTimeout(playField.spawner, 1000);
+            setTimeout(playField.spawner, 2000);
     }
 
     playField.getRandomId = function() {
@@ -43,6 +46,34 @@ var playField = function() {
     }
     playField.getRandomCoordinate = function() {
         return Math.floor((Math.random() * 300) + 1);
+    }
+
+    playField.updatePlayer = function(id, data, callback) {
+        for (var i = 0; i<map.length; i++) {
+            if (id == map[i].id) {
+                map[i].position.x = data.x;
+                map[i].position.y = data.y;
+                map[i].speed = data.speed;
+                map[i].size = data.size;
+                break;
+            }
+        }
+        callback(map);
+    }
+    playField.removeEntity = function(id, data, callback) {
+        for (var i = 0; i<map.length; i++) {
+            if (data.id == map[i].id) {
+                map = playField.itemPop(i, map);
+                callback(data.id)
+                return;
+            }
+        }
+    }
+    playField.itemPop = function(index, list) {
+        if (index > -1) {
+            list.splice(index, 1)
+        }
+        return list;
     }
 
 }

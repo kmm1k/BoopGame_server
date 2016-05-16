@@ -20,13 +20,22 @@ io.on('connection', function (socket) {
         console.log("player disconnected")
     })
     socket.on('addPlayer', function(data) {
-        console.log(data)
+        console.log('addPlayer')
         playField.addPlayer(socket.id, data, function(player) {
             socket.emit('getPlayer', {player: player})
         })
     })
     socket.on('updatePlayer', function(data) {
-        //TODO: vb tuleks playeritel mingid
-        // id d objektide nimeks panna hoopis läheks lihtsamaks
+        console.log('updatePlayer')
+        playField.updatePlayer(socket.id, data, function(map) {
+            //console.log(map)
+            socket.emit('map', {map: map})
+        })
+    })
+    socket.on('removeEntity', function(data) {
+        console.log('removeEntity')
+        playField.removeEntity(socket.id, data, function (id) {
+            socket.broadcast.emit('removeEntity', {id: id});
+        })
     })
 })
