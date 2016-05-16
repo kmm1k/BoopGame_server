@@ -8,8 +8,10 @@ var playField = require('./playField.js');
 server.listen(8080, function () {
     console.log("server now running")
     playField();
-    playField.hello()
-    playField.spawner()
+    for (var i = 0; i < 20; i++) {
+        playField.spawner()
+    }
+
 });
 
 io.on('connection', function (socket) {
@@ -21,15 +23,16 @@ io.on('connection', function (socket) {
     })
     socket.on('addPlayer', function(data) {
         console.log('addPlayer')
+        socket.emit('getMap', {map: playField.getMap()});
         playField.addPlayer(socket.id, data, function(player) {
             socket.emit('getPlayer', {player: player})
-        })
+            socket.broadcast.emit('addOtherPlayer', {otherPlayer: player})
+        });
     })
     socket.on('updatePlayer', function(data) {
         console.log('updatePlayer')
-        playField.updatePlayer(socket.id, data, function(map) {
-            //console.log(map)
-            socket.emit('map', {map: map})
+        playField.updatePlayer(socket.id, data, function(player) {
+            socket.broadcast.emit('player', {player: player})
         })
     })
     socket.on('removeEntity', function(data) {
@@ -37,5 +40,10 @@ io.on('connection', function (socket) {
         playField.removeEntity(socket.id, data, function (id) {
             socket.broadcast.emit('removeEntity', {id: id});
         })
+        playField.addEntity(function(entity) {
+            socket.emit('addOtherPlayer', {otherPlayer: entity})
+            socket.broadcast.emit('addOtherPlayer', {otherPlayer: entity})
+        })
     })
+
 })

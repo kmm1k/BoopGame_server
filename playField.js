@@ -3,17 +3,14 @@
  */
 var playField = function() {
     var map = [];
-    playField.hello = function() {
-        console.log("hello world")
-    }
     playField.addPlayer = function(id, data, callback) {
         console.log(map);
         var entity = {
             id: id,
             name: data.name,
             position: {
-                x: 10,
-                y: 100
+                x: -100,
+                y: -100
             },
             size: 20,
             speed: 300
@@ -27,8 +24,11 @@ var playField = function() {
     }
 
     playField.spawner = function() {
+        if (map.length > 20)
+            return;
         var entity = {
             id: playField.getRandomId(),
+            name: "",
             position: {
                 x: playField.getRandomCoordinate(),
                 y: playField.getRandomCoordinate()
@@ -38,7 +38,21 @@ var playField = function() {
         };
         //console.log(entity)
         map.push(entity)
-            setTimeout(playField.spawner, 2000);
+    }
+
+    playField.addEntity = function(callback) {
+        var entity = {
+            id: playField.getRandomId(),
+            name: "",
+            position: {
+                x: playField.getRandomCoordinate(),
+                y: playField.getRandomCoordinate()
+            },
+            size: 10,
+            speed: 0
+        };
+        map.push(entity);
+        callback(entity);
     }
 
     playField.getRandomId = function() {
@@ -55,10 +69,10 @@ var playField = function() {
                 map[i].position.y = data.y;
                 map[i].speed = data.speed;
                 map[i].size = data.size;
-                break;
+                callback(map[i]);
+                return;
             }
         }
-        callback(map);
     }
     playField.removeEntity = function(id, data, callback) {
         for (var i = 0; i<map.length; i++) {
@@ -74,6 +88,20 @@ var playField = function() {
             list.splice(index, 1)
         }
         return list;
+    }
+    playField.newSpawner = function(callback) {
+        var entity = {
+            id: playField.getRandomId(),
+            position: {
+                x: playField.getRandomCoordinate(),
+                y: playField.getRandomCoordinate()
+            },
+            size: 10,
+            speed: 0
+        };
+        //console.log(entity)
+        map.push(entity)
+        callback(entity);
     }
 
 }
