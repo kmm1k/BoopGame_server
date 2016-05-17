@@ -11,8 +11,8 @@ server.listen(8080, function () {
     for (var i = 0; i < 20; i++) {
         playField.spawner()
     }
-
 });
+
 
 io.on('connection', function (socket) {
     console.log("player connected");
@@ -23,26 +23,37 @@ io.on('connection', function (socket) {
     })
     socket.on('addPlayer', function(data) {
         console.log('addPlayer')
-        socket.emit('getMap', {map: playField.getMap()});
+        playField.getMap(socket.id, function(map) {
+            socket.emit('getMap', {map: map});
+        })
+
         playField.addPlayer(socket.id, data, function(player) {
             socket.emit('getPlayer', {player: player})
-            socket.broadcast.emit('addOtherPlayer', {otherPlayer: player})
+            socket.broadcast.emit('addEntity', {otherPlayer: player})
         });
     })
     socket.on('updatePlayer', function(data) {
         console.log('updatePlayer')
-        playField.updatePlayer(socket.id, data, function(player) {
+        /*playField.updatePlayer(socket.id, data, function(player) {
             socket.broadcast.emit('player', {player: player})
+        })*/
+        playField.updatePlayer(socket.id, data, function () {
+            playField.sendPlayerMap(socket.id, function(playerMap) {
+                if (playerMap.length > 0){
+                    socket.emit('playerMap', {playerMap: playerMap})
+                }
+            })
         })
+
     })
     socket.on('removeEntity', function(data) {
         console.log('removeEntity')
-        playField.removeEntity(socket.id, data, function (id) {
+        playField.removeEntity(data, function (id) {
             socket.broadcast.emit('removeEntity', {id: id});
         })
         playField.addEntity(function(entity) {
-            socket.emit('addOtherPlayer', {otherPlayer: entity})
-            socket.broadcast.emit('addOtherPlayer', {otherPlayer: entity})
+            socket.emit('addEntity', {otherPlayer: entity})
+            socket.broadcast.emit('addEntity', {otherPlayer: entity})
         })
     })
 

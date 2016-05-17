@@ -1,59 +1,64 @@
 /**
  * Created by karl on 15.05.2016.
  */
+
+var Entity = function(id, name, x, y, size, speed) {
+    return {
+        id: id,
+        name: name,
+        position: {
+            x: x,
+            y: y
+        },
+        size: size,
+        speed: speed
+    };
+}
+var HashMap = require('hashmap');
+var playerMap;
+var map;
 var playField = function() {
-    var map = [];
+    map = new HashMap();
+    playerMap = new HashMap();
     playField.addPlayer = function(id, data, callback) {
         console.log(map);
-        var entity = {
-            id: id,
-            name: data.name,
-            position: {
-                x: -100,
-                y: -100
-            },
-            size: 20,
-            speed: 300
-        };
-        map.push(entity);
-        console.log(map)
+        var entity = new Entity(id, data.name,
+            playField.getRandomCoordinate()-100,
+            playField.getRandomCoordinate()-300,
+            20,
+            300);
+        map.set(id, entity);
+        playerMap.set(id, entity);
         callback(entity);
     }
-    playField.getMap = function() {
-        return map
+    playField.getMap = function(id, callback) {
+        var localMap = map.clone();
+        var mapArray = [];
+        localMap.remove(id)
+        //console.log(localPlayerMap)
+        localMap.forEach(function(value, key) {
+            mapArray.push(value);
+        });
+        callback(mapArray);
     }
 
     playField.spawner = function() {
-        if (map.length > 20)
-            return;
-        var entity = {
-            id: playField.getRandomId(),
-            name: "",
-            position: {
-                x: playField.getRandomCoordinate(),
-                y: playField.getRandomCoordinate()
-            },
-            size: 10,
-            speed: 0
-        };
-        //console.log(entity)
-        map.push(entity)
+        playField.addEntity(function(entity) {
+
+        })
     }
 
     playField.addEntity = function(callback) {
-        var entity = {
-            id: playField.getRandomId(),
-            name: "",
-            position: {
-                x: playField.getRandomCoordinate(),
-                y: playField.getRandomCoordinate()
-            },
-            size: 10,
-            speed: 0
-        };
-        map.push(entity);
+        var id = playField.getRandomId();
+        var entity = new Entity(id, "",
+            playField.getRandomCoordinate(),
+            playField.getRandomCoordinate(),
+            10,
+            0);
+        map.set(id, entity)
         callback(entity);
     }
+
 
     playField.getRandomId = function() {
         return Math.random().toString(36).slice(2);
@@ -63,25 +68,17 @@ var playField = function() {
     }
 
     playField.updatePlayer = function(id, data, callback) {
-        for (var i = 0; i<map.length; i++) {
-            if (id == map[i].id) {
-                map[i].position.x = data.x;
-                map[i].position.y = data.y;
-                map[i].speed = data.speed;
-                map[i].size = data.size;
-                callback(map[i]);
-                return;
-            }
-        }
+        var entity = playerMap.get(id);
+        entity.position.x = data.x;
+        entity.position.y = data.y;
+        entity.speed = data.speed;
+        entity.size = data.size;
+        playerMap.set(id, entity);
+        callback();
     }
-    playField.removeEntity = function(id, data, callback) {
-        for (var i = 0; i<map.length; i++) {
-            if (data.id == map[i].id) {
-                map = playField.itemPop(i, map);
-                callback(data.id)
-                return;
-            }
-        }
+    playField.removeEntity = function(data, callback) {
+        map.remove(data.id);
+        callback(data.id)
     }
     playField.itemPop = function(index, list) {
         if (index > -1) {
@@ -89,19 +86,15 @@ var playField = function() {
         }
         return list;
     }
-    playField.newSpawner = function(callback) {
-        var entity = {
-            id: playField.getRandomId(),
-            position: {
-                x: playField.getRandomCoordinate(),
-                y: playField.getRandomCoordinate()
-            },
-            size: 10,
-            speed: 0
-        };
-        //console.log(entity)
-        map.push(entity)
-        callback(entity);
+    playField.sendPlayerMap = function(id, callback) {
+        var localPlayerMap = playerMap.clone();
+        var localPlayerArray = [];
+        localPlayerMap.remove(id)
+        //console.log(localPlayerMap)
+        localPlayerMap.forEach(function(value, key) {
+            localPlayerArray.push(value);
+        });
+        callback(localPlayerArray)
     }
 
 }
