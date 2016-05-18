@@ -22,25 +22,30 @@ io.on('connection', function (socket) {
         console.log("player disconnected")
     });
     socket.on('addPlayer', function(data) {
-        console.log('addPlayer');
-        playField.makeSpawnArea(300, 20, 200, function(){
-            playField.getMap(socket.id, function(map) {
-                socket.emit('getMap', {map: map});
-            })
+        //see if there is an empty lobby
+        var spawnAreaSize = 2000;
+        playField.addPersonToLobby(socket.id, function(lobbyId, lobbyMade) {
+            socket.emit('getLobbyId', {lobbyId: lobbyId});
+            playField.makePlayArea(lobbyMade, lobbyId, spawnAreaSize, 20, 20000, function(){
+                playField.getMap(lobbyId, socket.id, function(map) {
+                    socket.emit('getMap', {map: map});
+                    //add player to the lobby map
+                    playField.addPlayer(lobbyId, socket.id, spawnAreaSize, data, function(player) {
+                        socket.emit('getPlayer', {player: player});
+                        socket.broadcast.emit('addEntity', {otherPlayer: player, lobbyId: lobbyId})
+                    });
+                })
+            });
         });
 
-        playField.addPlayer(socket.id, data, function(player) {
-            socket.emit('getPlayer', {player: player});
-            socket.broadcast.emit('addEntity', {otherPlayer: player})
-        });
     });
     socket.on('updatePlayer', function(data) {
-        console.log('updatePlayer');
+        //console.log('updatePlayer');
         /*playField.updatePlayer(socket.id, data, function(player) {
             socket.broadcast.emit('player', {player: player})
         })*/
         playField.updatePlayer(socket.id, data, function () {
-            playField.sendPlayerMap(socket.id, function(playerMap) {
+            playField.sendPlayerMap(data.lobbyId, socket.id, function(playerMap) {
                 if (playerMap.length > 0){
                     socket.emit('playerMap', {playerMap: playerMap})
                 }
@@ -51,12 +56,12 @@ io.on('connection', function (socket) {
     socket.on('removeEntity', function(data) {
         console.log('removeEntity');
         playField.removeEntity(data, function (id) {
-            socket.broadcast.emit('removeEntity', {id: id});
+            socket.broadcast.emit('removeEntity', {id: id, lobbyId: data.lobbyId});
         });
-        playField.addEntity(function(entity) {
+        /*playField.addEntity(data.lobbyId, function(entity) {
             socket.emit('addEntity', {otherPlayer: entity});
-            socket.broadcast.emit('addEntity', {otherPlayer: entity})
-        })
+            socket.broadcast.emit('addEntity', {otherPlayer: entity, lobbyId: data.lobbyId})
+        })*/
     })
 
 });
