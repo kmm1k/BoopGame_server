@@ -56,7 +56,7 @@ io.on('connection', function (socket) {
     socket.on('removeEntity', function(data) {
         console.log('removeEntity');
         playField.removeEntity(data, function (id) {
-            socket.broadcast.emit('removeEntity', {id: id, lobbyId: data.lobbyId});
+            //socket.broadcast.emit('removeEntity', {id: id, lobbyId: data.lobbyId});
         });
         /*playField.addEntity(data.lobbyId, function(entity) {
             socket.emit('addEntity', {otherPlayer: entity});
