@@ -30,9 +30,9 @@ io.on('connection', function (socket) {
                 playField.getMap(lobbyId, socket.id, function(map) {
                     socket.emit('getMap', {map: map});
                     //add player to the lobby map
-                    playField.addPlayer(lobbyId, socket.id, spawnAreaSize, data, function(player) {
+                    playField.addPlayer(lobbyMade, lobbyId, socket.id, spawnAreaSize, data, function(player, speed) {
                         socket.emit('getPlayer', {player: player});
-                        socket.broadcast.emit('addEntity', {otherPlayer: player, lobbyId: lobbyId})
+                        socket.broadcast.emit('addEntity', {otherPlayer: player, lobbyId: lobbyId, speed: speed})
                     });
                 })
             });

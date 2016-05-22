@@ -59,7 +59,11 @@ var playField = function() {
     map = new HashMap();
     playerMap = new HashMap();
     lobbys = new HashMap();
-    playField.addPlayer = function(lobbyId, id, spawnAreaSize, data, callback) {
+    playField.addPlayer = function(lobbyMade, lobbyId, id, spawnAreaSize, data, callback) {
+        var speed = 0
+        if (lobbyMade){
+            speed = 200;
+        }
         var lobby = lobbys.get(lobbyId);
         var x = spawnAreaSize/2;
         var y = 0;
@@ -72,10 +76,10 @@ var playField = function() {
             x,
             y,
             20,
-            300);
+            speed);
         lobby.map.set(id, entity);
         lobby.playerMap.set(id, entity);
-        callback(entity);
+        callback(entity, speed);
     };
     playField.getMap = function(lobbyId, id, callback) {
         var lobby = lobbys.get(lobbyId)
