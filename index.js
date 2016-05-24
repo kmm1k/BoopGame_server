@@ -63,5 +63,9 @@ io.on('connection', function (socket) {
             socket.broadcast.emit('addEntity', {otherPlayer: entity, lobbyId: data.lobbyId})
         })*/
     })
+    socket.on('gameOver', function(data) {
+        console.log('game over '+ data.lobbyId);
+        socket.broadcast.emit('gameOver', {lobbyId: data.lobbyId});
+    })
 
 });
